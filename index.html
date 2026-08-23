@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lagos4Rent Real Estate | Lagos Rentals & Property</title>
+  <meta name="description" content="Find Lagos rentals and properties with clear pricing, verified details and direct WhatsApp assistance from Lagos4Rent Real Estate.">
+  <meta property="og:title" content="Lagos4Rent Real Estate">
+  <meta property="og:description" content="Lagos rentals made easier. Browse available properties and talk to us directly.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#002A65">
+  <link rel="icon" href="/assets/img/lagos4rent-logo.svg">
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a class="brand" href="/" aria-label="Lagos4Rent home"><img src="/assets/img/lagos4rent-logo.svg" alt="Lagos4Rent Real Estate"></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/">Home</a><a href="/listings">Listings</a><a href="/about">About</a><a href="/contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-outline" href="/listings">Browse homes</a>
+      <a class="btn btn-orange" data-wa-general>WhatsApp us</a>
+      <button class="mobile-toggle" data-mobile-toggle aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+  </div>
+  <nav class="mobile-menu" data-mobile-menu><a href="/">Home</a><a href="/listings">Listings</a><a href="/about">About</a><a href="/contact">Contact</a><a data-wa-general>WhatsApp us</a></nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Lagos property, without the guesswork</span>
+        <h1>Find a place that <span>feels right</span> in Lagos.</h1>
+        <p class="lead">Browse clearly presented homes, understand the real price, and get direct help when you are ready to inspect or ask questions.</p>
+        <div class="hero-points"><span>Clear pricing</span><span>Property details</span><span>Direct WhatsApp assistance</span></div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-card">
+          <div class="hero-house-line"></div>
+          <div class="skyline">
+            <span style="height:35%"></span><span style="height:52%"></span><span style="height:42%"></span><span style="height:76%"></span><span style="height:57%"></span><span style="height:88%"></span><span style="height:66%"></span><span style="height:95%"></span><span style="height:62%"></span><span style="height:74%"></span><span style="height:46%"></span><span style="height:69%"></span>
+          </div>
+          <div class="hero-logo-text">Lagos4Rent<small>REAL ESTATE</small></div>
+        </div>
+        <div class="hero-badge"><strong>Local assistance</strong><span>Ask about availability, inspection and next steps directly.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container search-panel">
+    <form class="search-card" id="home-search">
+      <div class="field"><label for="purpose">Looking to</label><select id="purpose" name="purpose"><option value="">Rent or buy</option><option value="rent">Rent</option><option value="sale">Buy</option></select></div>
+      <div class="field"><label for="neighbourhood">Area</label><input id="neighbourhood" name="neighbourhood" placeholder="Lekki, Yaba, Ikeja…"></div>
+      <div class="field"><label for="property_type">Property type</label><select id="property_type" name="property_type"><option value="">Any type</option><option>Apartment</option><option>Flat</option><option>Duplex</option><option>House</option><option>Studio</option><option>Terrace</option><option>Office</option><option>Land</option></select></div>
+      <div class="field"><label for="min_price">Min price</label><input id="min_price" name="min_price" inputmode="numeric" placeholder="₦ min"></div>
+      <div class="field"><label for="bedrooms">Bedrooms</label><select id="bedrooms" name="bedrooms"><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option><option value="5">5+</option></select></div>
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-heading"><span class="eyebrow">Current opportunities</span><h2>Featured properties</h2><p>A focused selection of published Lagos4Rent listings. We only show properties added to our live inventory.</p></div>
+      <div class="property-grid" id="featured-grid"></div>
+      <div style="margin-top:30px;text-align:center"><a class="btn btn-outline" href="/listings">View all listings</a></div>
+    </div>
+  </section>
+
+  <section class="section section-warm">
+    <div class="container">
+      <div class="section-heading"><span class="eyebrow">Explore Lagos</span><h2>Popular areas</h2><p>Start with the neighbourhoods renters and buyers commonly ask us about.</p></div>
+      <div class="area-grid">
+        <a class="area-card" href="/listings?neighbourhood=Lekki" data-area="Lekki"><h3>Lekki</h3><span>Browse Lekki listings →</span></a>
+        <a class="area-card" href="/listings?neighbourhood=Yaba" data-area="Yaba"><h3>Yaba</h3><span>Browse Yaba listings →</span></a>
+        <a class="area-card" href="/listings?neighbourhood=Ikeja" data-area="Ikeja"><h3>Ikeja</h3><span>Browse Ikeja listings →</span></a>
+        <a class="area-card" href="/listings?neighbourhood=Victoria%20Island" data-area="Victoria Island"><h3>Victoria Island</h3><span>Browse VI listings →</span></a>
+        <a class="area-card" href="/listings?neighbourhood=Ikoyi" data-area="Ikoyi"><h3>Ikoyi</h3><span>Browse Ikoyi listings →</span></a>
+        <a class="area-card" href="/listings?neighbourhood=Surulere" data-area="Surulere"><h3>Surulere</h3><span>Browse Surulere listings →</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-heading"><span class="eyebrow">A clearer process</span><h2>Property search should feel straightforward.</h2></div>
+      <div class="value-grid">
+        <article class="card value-card"><div class="value-icon">01</div><h3>Verified details</h3><p>We present the information we have clearly, so you can screen a property before spending time on an inspection.</p></article>
+        <article class="card value-card"><div class="value-icon">02</div><h3>Clear pricing</h3><p>Prices and rent frequency are displayed in naira, with property status visible before you enquire.</p></article>
+        <article class="card value-card"><div class="value-icon">03</div><h3>Direct assistance</h3><p>When a listing interests you, reach Lagos4Rent on WhatsApp with the property reference already included.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-warm">
+    <div class="container">
+      <div class="section-heading"><span class="eyebrow">How it works</span><h2>Three simple steps</h2></div>
+      <div class="steps">
+        <div class="step"><h3>Browse</h3><p>Filter available listings by area, budget, bedrooms and property type.</p></div>
+        <div class="step"><h3>Shortlist</h3><p>Open a listing to review photos, videos, price, amenities and availability.</p></div>
+        <div class="step"><h3>Talk to us</h3><p>Send the property reference directly through WhatsApp or the enquiry form.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container"><div class="cta-band"><div><h2>Tell us what you are looking for.</h2><p>Share your preferred area, property type and budget. We will take it from there.</p></div><a class="btn btn-orange" data-wa-general>Start on WhatsApp</a></div></div>
+  </section>
+</main>
+
+<footer class="site-footer"><div class="container"><div class="footer-grid">
+  <div class="footer-col"><div class="footer-logo"><img src="/assets/img/lagos4rent-logo.svg" alt="Lagos4Rent"></div><p>Lagos rentals made easier, with clear property information and direct assistance.</p></div>
+  <div class="footer-col"><h4>Explore</h4><a href="/listings">Listings</a><a href="/about">About</a><a href="/contact">Contact</a></div>
+  <div class="footer-col"><h4>Areas</h4><a href="/listings?neighbourhood=Lekki">Lekki</a><a href="/listings?neighbourhood=Yaba">Yaba</a><a href="/listings?neighbourhood=Ikeja">Ikeja</a></div>
+  <div class="footer-col"><h4>Contact</h4><a data-wa-general>WhatsApp +234 913 708 8563</a><a href="https://www.instagram.com/lagosforrent/" target="_blank" rel="noopener">Instagram @lagosforrent</a></div>
+</div><div class="footer-bottom"><span>© <span id="year"></span> Lagos4Rent Real Estate.</span><span>Honest. Transparent. Local.</span></div></div></footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+<script type="module" src="/assets/js/home.js"></script>
+</body></html>
