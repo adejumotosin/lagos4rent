@@ -82,7 +82,7 @@ export function initSiteChrome() {
 export function propertyCard(listing) {
   const img = listing.cover_url
     ? `<img src="${escapeHTML(listing.cover_url)}" alt="${escapeHTML(listing.title)}" loading="lazy">`
-    : `<div class="property-placeholder"><img src="/assets/img/lagos4rent-logo.svg" alt=""></div>`;
+    : `<div class="property-placeholder"><img src="/assets/img/lagos4rent-official.svg" alt=""></div>`;
   const frequency = listing.purpose === 'rent' && listing.rent_frequency ? ` / ${titleCase(listing.rent_frequency)}` : '';
   const statusClass = listing.availability_status === 'available' ? 'success' : listing.availability_status === 'reserved' ? 'warning' : 'danger';
   const facts = [
