@@ -62,7 +62,14 @@ form?.addEventListener('submit', async (e) => {
     if (mode === 'setup') {
       if (!fullName) throw new Error('Enter your name.');
       if (password.length < 8) throw new Error('Use a password with at least 8 characters.');
-      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: 'https://lagos4rent.vercel.app/admin'
+        }
+      });
       if (error) throw error;
       if (data.session) {
         const claimed = await claimIfFirst();
