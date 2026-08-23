@@ -2,6 +2,11 @@
 
 Production-ready website and admin CMS for Lagos4Rent.
 
+## Live deployment
+
+- Public website: https://lagos4rent.vercel.app
+- Admin: https://lagos4rent.vercel.app/admin
+
 ## Features
 
 - Premium public real estate website
@@ -27,4 +32,4 @@ Open `/admin` on the deployed site. When no administrator exists, the first auth
 
 ## Deployment
 
-The project is designed for Vercel static deployment using `vercel.json` routing.
+The source is maintained in this repository and the production site is deployed on Vercel.
