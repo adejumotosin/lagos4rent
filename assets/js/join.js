@@ -1,5 +1,5 @@
 import { supabase } from './config.js';
-import { setLoading } from './common.js';
+import { setLoading } from './common.js?v=marketplace-20260824';
 
 const form=document.querySelector('#auth-form'),loginBtn=document.querySelector('#show-login'),signupBtn=document.querySelector('#show-signup'),nameField=document.querySelector('#name-field'),signupOptions=document.querySelector('#signup-options'),title=document.querySelector('#auth-title'),sub=document.querySelector('#auth-sub'),submit=document.querySelector('#auth-submit'),message=document.querySelector('#auth-message'),hint=document.querySelector('#password-hint');
 let mode='login',accountType='renter';const params=new URLSearchParams(location.search);const next=params.get('next')||'/dashboard';
