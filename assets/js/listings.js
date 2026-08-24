@@ -1,5 +1,5 @@
 import { supabase } from './config.js';
-import { emptyListings, propertyCard, skeletonCards, titleCase } from './common.js';
+import { emptyListings, propertyCard, skeletonCards, titleCase } from './common.js?v=marketplace-20260824';
 
 const grid=document.querySelector('#listings-grid'),countEl=document.querySelector('#result-count'),panel=document.querySelector('#filter-panel'),form=document.querySelector('#filters-form'),sort=document.querySelector('#sort'),params=new URLSearchParams(location.search);let rows=[];
 ['source_type','trust','neighbourhood','property_type','min_price','max_price','max_total','bedrooms','availability_status'].forEach(n=>{const el=form?.elements.namedItem(n);if(el&&params.has(n))el.value=params.get(n)});if(sort)sort.value=params.get('sort')||'newest';
