@@ -1,5 +1,5 @@
 import { supabase } from './config.js';
-import { currentSession, dateFmt, escapeHTML, money, titleCase, toast, trustBadge, setLoading } from './common.js';
+import { currentSession, dateFmt, escapeHTML, money, titleCase, toast, trustBadge, setLoading } from './common.js?v=marketplace-20260824';
 
 const root=document.querySelector('#property-root');const parts=location.pathname.split('/').filter(Boolean);const slug=parts[0]==='listings'&&parts[1]?decodeURIComponent(parts.slice(1).join('/')):new URLSearchParams(location.search).get('slug');
 function missing(){root.innerHTML='<div class="container"><div class="empty-state" style="margin:60px 0"><div class="icon">⌂</div><h3>Property not found</h3><p>This home may have been removed or is no longer public.</p><a class="btn btn-primary" href="/listings">Browse homes</a></div></div>'}
