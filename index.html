@@ -1,117 +1,13 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Lagos4Rent Real Estate | Lagos Rentals & Property</title>
-  <meta name="description" content="Find Lagos rentals and properties with clear pricing, verified details and direct WhatsApp assistance from Lagos4Rent Real Estate.">
-  <meta property="og:title" content="Lagos4Rent Real Estate">
-  <meta property="og:description" content="Lagos rentals made easier. Browse available properties and talk to us directly.">
-  <meta property="og:type" content="website">
-  <meta name="theme-color" content="#002A65">
-  <link rel="icon" href="/assets/img/lagos4rent-official.svg">
-  <link rel="stylesheet" href="/assets/css/styles.css">
-</head>
-<body>
-<header class="site-header">
-  <div class="container nav-wrap">
-    <a class="brand" href="/" aria-label="Lagos4Rent home"><img src="/assets/img/lagos4rent-official.svg" alt="Lagos4Rent Real Estate"></a>
-    <nav class="nav-links" aria-label="Main navigation">
-      <a href="/">Home</a><a href="/listings">Listings</a><a href="/about">About</a><a href="/contact">Contact</a>
-    </nav>
-    <div class="nav-actions">
-      <a class="btn btn-outline" href="/listings">Browse homes</a>
-      <a class="btn btn-orange" data-wa-general>WhatsApp us</a>
-      <button class="mobile-toggle" data-mobile-toggle aria-label="Open menu" aria-expanded="false">☰</button>
-    </div>
-  </div>
-  <nav class="mobile-menu" data-mobile-menu><a href="/">Home</a><a href="/listings">Listings</a><a href="/about">About</a><a href="/contact">Contact</a><a data-wa-general>WhatsApp us</a></nav>
-</header>
-
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lagos4Rent | A safer way to rent in Lagos</title><meta name="description" content="Find Lagos homes through verified agents or Tenant Direct listings, with transparent fees, reviews and scam reporting built in."><meta property="og:title" content="Lagos4Rent — A safer way to rent in Lagos"><meta property="og:description" content="Connect with trusted agents and current tenants, see real move-in costs and report suspicious listings."><meta name="theme-color" content="#002A65"><link rel="icon" href="/assets/img/lagos4rent-official.svg"><link rel="stylesheet" href="/assets/css/styles.css"><link rel="stylesheet" href="/assets/css/marketplace.css"></head><body>
+<div class="market-header-note">Safety first: Lagos4Rent never asks you to pay an agent just because they contacted you here. <a href="/safety">Read the safety rules →</a></div>
+<header class="site-header market-nav"><div class="container nav-wrap"><a class="brand" href="/"><img src="/assets/img/lagos4rent-official.svg" alt="Lagos4Rent Real Estate"></a><nav class="nav-links"><a href="/listings">Browse homes</a><a href="/agents">Agents</a><a href="/listings?source_type=tenant_direct">Tenant Direct</a><a href="/safety">Safety</a></nav><div class="nav-actions"><a class="btn btn-outline account-btn" data-account-link href="/join">Sign in</a><a class="btn btn-orange" href="/join?intent=post">Post a home</a><button class="mobile-toggle" data-mobile-toggle aria-label="Open menu">☰</button></div></div><nav class="mobile-menu" data-mobile-menu><a href="/listings">Browse homes</a><a href="/agents">Agents</a><a href="/listings?source_type=tenant_direct">Tenant Direct</a><a href="/safety">Safety</a><a data-account-link href="/join">Sign in</a></nav></header>
 <main>
-  <section class="hero">
-    <div class="container hero-grid">
-      <div class="hero-copy">
-        <span class="eyebrow">Lagos property, without the guesswork</span>
-        <h1>Find a place that <span>feels right</span> in Lagos.</h1>
-        <p class="lead">Browse clearly presented homes, understand the real price, and get direct help when you are ready to inspect or ask questions.</p>
-        <div class="hero-points"><span>Clear pricing</span><span>Property details</span><span>Direct WhatsApp assistance</span></div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">
-        <div class="hero-card" style="background:#fff;display:grid;place-items:center;padding:38px;">
-          <img src="/assets/img/lagos4rent-official.svg" alt="" style="width:94%;max-width:520px;height:auto;position:relative;z-index:2;">
-        </div>
-        <div class="hero-badge"><strong>Local assistance</strong><span>Ask about availability, inspection and next steps directly.</span></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="container search-panel">
-    <form class="search-card" id="home-search">
-      <div class="field"><label for="purpose">Looking to</label><select id="purpose" name="purpose"><option value="">Rent or buy</option><option value="rent">Rent</option><option value="sale">Buy</option></select></div>
-      <div class="field"><label for="neighbourhood">Area</label><input id="neighbourhood" name="neighbourhood" placeholder="Lekki, Yaba, Ikeja…"></div>
-      <div class="field"><label for="property_type">Property type</label><select id="property_type" name="property_type"><option value="">Any type</option><option>Apartment</option><option>Flat</option><option>Duplex</option><option>House</option><option>Studio</option><option>Terrace</option><option>Office</option><option>Land</option></select></div>
-      <div class="field"><label for="min_price">Min price</label><input id="min_price" name="min_price" inputmode="numeric" placeholder="₦ min"></div>
-      <div class="field"><label for="bedrooms">Bedrooms</label><select id="bedrooms" name="bedrooms"><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option><option value="5">5+</option></select></div>
-      <button class="btn btn-primary" type="submit">Search</button>
-    </form>
-  </div>
-
-  <section class="section">
-    <div class="container">
-      <div class="section-heading"><span class="eyebrow">Current opportunities</span><h2>Featured properties</h2><p>A focused selection of published Lagos4Rent listings. We only show properties added to our live inventory.</p></div>
-      <div class="property-grid" id="featured-grid"></div>
-      <div style="margin-top:30px;text-align:center"><a class="btn btn-outline" href="/listings">View all listings</a></div>
-    </div>
-  </section>
-
-  <section class="section section-warm">
-    <div class="container">
-      <div class="section-heading"><span class="eyebrow">Explore Lagos</span><h2>Popular areas</h2><p>Start with the neighbourhoods renters and buyers commonly ask us about.</p></div>
-      <div class="area-grid">
-        <a class="area-card" href="/listings?neighbourhood=Lekki" data-area="Lekki"><h3>Lekki</h3><span>Browse Lekki listings →</span></a>
-        <a class="area-card" href="/listings?neighbourhood=Yaba" data-area="Yaba"><h3>Yaba</h3><span>Browse Yaba listings →</span></a>
-        <a class="area-card" href="/listings?neighbourhood=Ikeja" data-area="Ikeja"><h3>Ikeja</h3><span>Browse Ikeja listings →</span></a>
-        <a class="area-card" href="/listings?neighbourhood=Victoria%20Island" data-area="Victoria Island"><h3>Victoria Island</h3><span>Browse VI listings →</span></a>
-        <a class="area-card" href="/listings?neighbourhood=Ikoyi" data-area="Ikoyi"><h3>Ikoyi</h3><span>Browse Ikoyi listings →</span></a>
-        <a class="area-card" href="/listings?neighbourhood=Surulere" data-area="Surulere"><h3>Surulere</h3><span>Browse Surulere listings →</span></a>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <div class="section-heading"><span class="eyebrow">A clearer process</span><h2>Property search should feel straightforward.</h2></div>
-      <div class="value-grid">
-        <article class="card value-card"><div class="value-icon">01</div><h3>Verified details</h3><p>We present the information we have clearly, so you can screen a property before spending time on an inspection.</p></article>
-        <article class="card value-card"><div class="value-icon">02</div><h3>Clear pricing</h3><p>Prices and rent frequency are displayed in naira, with property status visible before you enquire.</p></article>
-        <article class="card value-card"><div class="value-icon">03</div><h3>Direct assistance</h3><p>When a listing interests you, reach Lagos4Rent on WhatsApp with the property reference already included.</p></article>
-      </div>
-    </div>
-  </section>
-
-  <section class="section section-warm">
-    <div class="container">
-      <div class="section-heading"><span class="eyebrow">How it works</span><h2>Three simple steps</h2></div>
-      <div class="steps">
-        <div class="step"><h3>Browse</h3><p>Filter available listings by area, budget, bedrooms and property type.</p></div>
-        <div class="step"><h3>Shortlist</h3><p>Open a listing to review photos, videos, price, amenities and availability.</p></div>
-        <div class="step"><h3>Talk to us</h3><p>Send the property reference directly through WhatsApp or the enquiry form.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container"><div class="cta-band"><div><h2>Tell us what you are looking for.</h2><p>Share your preferred area, property type and budget. We will take it from there.</p></div><a class="btn btn-orange" data-wa-general>Start on WhatsApp</a></div></div>
-  </section>
+<section class="hero hero-market"><div class="container hero-grid"><div class="hero-copy"><span class="eyebrow">The trust layer for renting in Lagos</span><h1>Rent in Lagos without guessing <span>who to trust.</span></h1><p class="lead">Find homes from verified agents and current tenants, see the real move-in cost before you enquire, and build every interaction around transparency and accountability.</p><div class="hero-actions"><a class="btn btn-primary" href="/listings">Browse homes</a><a class="btn btn-outline" href="/join?intent=post">I’m moving out</a></div><div class="trust-ribbon"><span>✓ Agent verification</span><span>✓ Transparent fees</span><span>✓ Verified-interaction reviews</span><span>✓ Scam reporting</span></div></div><div class="hero-visual"><div class="hero-card"><img src="/assets/img/lagos4rent-official.svg" alt="Lagos4Rent"></div><div class="hero-badge"><strong>Trust before transaction</strong><span>A badge tells you what Lagos4Rent has actually checked, not who paid more.</span></div></div></div></section>
+<div class="container search-panel"><form class="search-card market-search" id="home-search"><div class="field"><label>Listing type</label><select name="source_type"><option value="">Any source</option><option value="agent">Agent listed</option><option value="tenant_direct">Tenant Direct</option></select></div><div class="field"><label>Area</label><input name="neighbourhood" placeholder="Lekki, Yaba, Ikeja…"></div><div class="field"><label>Property type</label><select name="property_type"><option value="">Any type</option><option>Apartment</option><option>Flat</option><option>Duplex</option><option>House</option><option>Studio</option><option>Terrace</option></select></div><div class="field"><label>Max rent</label><input name="max_price" inputmode="numeric" placeholder="₦ budget"></div><div class="field"><label>Bedrooms</label><select name="bedrooms"><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></div><button class="btn btn-primary">Search</button></form></div>
+<section class="section"><div class="container"><div class="section-heading"><span class="eyebrow">How trust works</span><h2>Protection should be part of the product.</h2><p>Lagos4Rent separates identity checks, property checks and reputation so renters can see exactly what has and has not been verified.</p></div><div class="trust-grid"><article class="trust-card"><div class="trust-num">01</div><h3>Know who is listing</h3><p>Agents can undergo identity and profile verification. Paying for promotion never buys a verification badge.</p></article><article class="trust-card"><div class="trust-num">02</div><h3>See every major fee</h3><p>Rent, agency, legal, caution, service charge and other fees are shown separately with a total move-in cost.</p></article><article class="trust-card"><div class="trust-num">03</div><h3>Review real interactions</h3><p>Our review system is designed around completed platform connections rather than anonymous drive-by ratings.</p></article><article class="trust-card"><div class="trust-num">04</div><h3>Report suspicious behaviour</h3><p>Users can flag scams, unauthorized listings, misleading fees, duplicates and harassment for review.</p></article></div></div></section>
+<section class="section section-warm"><div class="container"><div class="section-heading"><span class="eyebrow">Two ways to find a home</span><h2>Use an agent, or skip one when it makes sense.</h2></div><div class="mode-grid"><article class="mode-card agent-mode"><span class="mode-tag">Verified agent network</span><h3>Work with agents who can build a public track record.</h3><p>Compare profiles, verified status, areas served, ratings and active listings before you decide who to speak with.</p><a class="btn btn-primary" href="/agents">Explore agents</a></article><article class="mode-card tenant-mode"><span class="mode-tag">Tenant Direct</span><h3>Discover apartments before they return to the agent market.</h3><p>Current tenants who are moving out can post their apartment and introduce interested renters to the landlord or authorized manager.</p><a class="btn btn-outline" href="/listings?source_type=tenant_direct">Browse Tenant Direct</a></article></div></div></section>
+<section class="section"><div class="container"><div class="section-heading"><span class="eyebrow">Current opportunities</span><h2>Homes on Lagos4Rent</h2><p>Only published listings appear here. User-submitted listings are reviewed before they go live.</p></div><div class="property-grid" id="featured-grid"></div><div style="text-align:center;margin-top:28px"><a class="btn btn-outline" href="/listings">View all homes</a></div></div></section>
+<section class="section"><div class="container"><div class="safety-band"><div><span class="eyebrow" style="color:#ffb44a">Before you pay anyone</span><h2>Verification reduces risk. It does not replace due diligence.</h2><p>Confirm the property, the landlord or authorized representative, the payment details and written terms. Tenant Direct means a tenant is introducing an opportunity, not that the tenant has authority to grant a tenancy.</p><div class="hero-actions"><a class="btn btn-orange" href="/safety">Read the safety guide</a></div></div><div class="warning-box"><strong>Never rely on urgency.</strong>“Pay now or lose it” is not proof that a property or agent is legitimate. Use the report tool if something feels wrong.</div></div></div></section>
 </main>
-
-<footer class="site-footer"><div class="container"><div class="footer-grid">
-  <div class="footer-col"><div class="footer-logo"><img src="/assets/img/lagos4rent-official.svg" alt="Lagos4Rent"></div><p>Lagos rentals made easier, with clear property information and direct assistance.</p></div>
-  <div class="footer-col"><h4>Explore</h4><a href="/listings">Listings</a><a href="/about">About</a><a href="/contact">Contact</a></div>
-  <div class="footer-col"><h4>Areas</h4><a href="/listings?neighbourhood=Lekki">Lekki</a><a href="/listings?neighbourhood=Yaba">Yaba</a><a href="/listings?neighbourhood=Ikeja">Ikeja</a></div>
-  <div class="footer-col"><h4>Contact</h4><a data-wa-general>WhatsApp +234 913 708 8563</a><a href="https://www.instagram.com/lagosforrent/" target="_blank" rel="noopener">Instagram @lagosforrent</a></div>
-</div><div class="footer-bottom"><span>© <span id="year"></span> Lagos4Rent Real Estate.</span><span>Honest. Transparent. Local.</span></div></div></footer>
-<script>document.getElementById('year').textContent=new Date().getFullYear()</script>
-<script type="module" src="/assets/js/home.js"></script>
-</body></html>
+<footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-col"><div class="footer-logo"><img src="/assets/img/lagos4rent-official.svg" alt="Lagos4Rent"></div><p>A more transparent way for renters, agents and current tenants to connect across Lagos.</p></div><div class="footer-col"><h4>Find a home</h4><a href="/listings">Browse homes</a><a href="/agents">Find agents</a><a href="/listings?source_type=tenant_direct">Tenant Direct</a></div><div class="footer-col"><h4>Trust</h4><a href="/safety">Safety guide</a><a href="/join">Create account</a><a href="/dashboard">Dashboard</a></div><div class="footer-col"><h4>Contact</h4><a data-wa-general>WhatsApp +234 913 708 8563</a><a href="https://www.instagram.com/lagosforrent/" target="_blank" rel="noopener">Instagram @lagosforrent</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> Lagos4Rent.</span><span>Trust before transaction.</span></div></div></footer><script>document.getElementById('year').textContent=new Date().getFullYear()</script><script type="module" src="/assets/js/home.js"></script></body></html>
