@@ -4,13 +4,19 @@
   "rewrites": [
     { "source": "/listings", "destination": "/listings.html" },
     { "source": "/listings/:slug", "destination": "/property.html" },
+    { "source": "/agents", "destination": "/agents.html" },
+    { "source": "/agents/:id", "destination": "/agent.html" },
+    { "source": "/join", "destination": "/join.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/safety", "destination": "/safety.html" },
     { "source": "/about", "destination": "/about.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/dashboard", "destination": "/admin/dashboard.html" },
     { "source": "/admin/listings", "destination": "/admin/listings.html" },
     { "source": "/admin/listing", "destination": "/admin/listing.html" },
-    { "source": "/admin/enquiries", "destination": "/admin/enquiries.html" }
+    { "source": "/admin/enquiries", "destination": "/admin/enquiries.html" },
+    { "source": "/admin/trust", "destination": "/admin/trust.html" }
   ],
   "headers": [
     {
@@ -19,6 +25,13 @@
         { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
+      "source": "/dashboard",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
     },
     {
