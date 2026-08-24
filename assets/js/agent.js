@@ -1,5 +1,5 @@
 import { supabase } from './config.js';
-import { escapeHTML, propertyCard } from './common.js';
+import { escapeHTML, propertyCard } from './common.js?v=marketplace-20260824';
 
 const root=document.querySelector('#agent-root'),parts=location.pathname.split('/').filter(Boolean),id=parts[0]==='agents'&&parts[1]?decodeURIComponent(parts[1]):new URLSearchParams(location.search).get('id');
 function missing(){root.innerHTML='<div class="container"><div class="empty-state" style="margin:60px 0"><h3>Agent profile not found</h3><p>This profile may not be public.</p><a class="btn btn-primary" href="/agents">Browse verified agents</a></div></div>'}
