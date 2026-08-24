@@ -1,96 +1,12 @@
 import { supabase } from './config.js';
 import { emptyListings, propertyCard, skeletonCards, titleCase } from './common.js';
 
-const grid = document.querySelector('#listings-grid');
-const countEl = document.querySelector('#result-count');
-const filterPanel = document.querySelector('#filter-panel');
-const params = new URLSearchParams(location.search);
-const form = document.querySelector('#filters-form');
-const sortSelect = document.querySelector('#sort');
-let allListings = [];
-
-const fieldNames = ['purpose','property_type','neighbourhood','min_price','max_price','bedrooms','bathrooms','availability_status'];
-for (const name of fieldNames) {
-  const el = form?.elements.namedItem(name);
-  if (el && params.has(name)) el.value = params.get(name);
-}
-for (const name of ['furnished','serviced','featured']) {
-  const el = form?.elements.namedItem(name);
-  if (el) el.checked = params.get(name) === 'true';
-}
-if (sortSelect) sortSelect.value = params.get('sort') || 'newest';
-
-document.querySelector('#mobile-filter-btn')?.addEventListener('click', () => filterPanel?.classList.toggle('open'));
-
-function currentFilters() {
-  const fd = new FormData(form);
-  const obj = Object.fromEntries(fd.entries());
-  for (const name of ['furnished','serviced','featured']) obj[name] = form.elements.namedItem(name)?.checked ? 'true' : '';
-  obj.sort = sortSelect?.value || 'newest';
-  return obj;
-}
-
-function syncUrl() {
-  const obj = currentFilters();
-  const next = new URLSearchParams();
-  for (const [k,v] of Object.entries(obj)) if (v != null && String(v).trim() !== '' && !(k === 'sort' && v === 'newest')) next.set(k,v);
-  history.replaceState({}, '', `/listings${next.toString() ? `?${next}` : ''}`);
-}
-
-function renderChips(filters) {
-  const wrap = document.querySelector('#active-filters');
-  if (!wrap) return;
-  const labels = {
-    purpose: 'Purpose', property_type:'Type', neighbourhood:'Area', min_price:'Min price', max_price:'Max price', bedrooms:'Bedrooms', bathrooms:'Bathrooms', availability_status:'Status', furnished:'Furnished', serviced:'Serviced', featured:'Featured'
-  };
-  const chips = Object.entries(filters)
-    .filter(([k,v]) => k !== 'sort' && v && v !== 'false')
-    .map(([k,v]) => `<span class="filter-chip">${labels[k] || titleCase(k)}: ${titleCase(v)}</span>`);
-  wrap.innerHTML = chips.join('');
-}
-
-function applyFilters() {
-  const f = currentFilters();
-  let rows = [...allListings];
-  if (f.purpose) rows = rows.filter(x => x.purpose === f.purpose);
-  if (f.property_type) rows = rows.filter(x => String(x.property_type).toLowerCase() === String(f.property_type).toLowerCase());
-  if (f.neighbourhood) {
-    const q = f.neighbourhood.toLowerCase();
-    rows = rows.filter(x => `${x.neighbourhood || ''} ${x.location || ''}`.toLowerCase().includes(q));
-  }
-  if (f.min_price) rows = rows.filter(x => Number(x.price) >= Number(f.min_price));
-  if (f.max_price) rows = rows.filter(x => Number(x.price) <= Number(f.max_price));
-  if (f.bedrooms) rows = rows.filter(x => Number(x.bedrooms || 0) >= Number(f.bedrooms));
-  if (f.bathrooms) rows = rows.filter(x => Number(x.bathrooms || 0) >= Number(f.bathrooms));
-  if (f.availability_status) rows = rows.filter(x => x.availability_status === f.availability_status);
-  if (f.furnished === 'true') rows = rows.filter(x => x.furnished);
-  if (f.serviced === 'true') rows = rows.filter(x => x.serviced);
-  if (f.featured === 'true') rows = rows.filter(x => x.featured);
-  if (f.sort === 'price-asc') rows.sort((a,b) => Number(a.price)-Number(b.price));
-  else if (f.sort === 'price-desc') rows.sort((a,b) => Number(b.price)-Number(a.price));
-  else rows.sort((a,b) => new Date(b.published_at || b.created_at)-new Date(a.published_at || a.created_at));
-
-  if (countEl) countEl.textContent = `${rows.length} ${rows.length === 1 ? 'property' : 'properties'}`;
-  renderChips(f);
-  grid.innerHTML = rows.length ? rows.map(propertyCard).join('') : emptyListings('Try adjusting your filters, or tell us what you need and we can assist directly.');
-  syncUrl();
-}
-
-form?.addEventListener('submit', (e) => { e.preventDefault(); applyFilters(); filterPanel?.classList.remove('open'); });
-sortSelect?.addEventListener('change', applyFilters);
-document.querySelector('#clear-filters')?.addEventListener('click', () => {
-  form.reset();
-  sortSelect.value = 'newest';
-  applyFilters();
-});
-
-grid.innerHTML = skeletonCards(6);
-const { data, error } = await supabase.from('listings_public').select('*').order('published_at',{ascending:false});
-if (error) {
-  console.error(error);
-  grid.innerHTML = emptyListings('Listings are temporarily unavailable. Please contact us directly while we fix this.');
-  countEl.textContent = 'Unable to load listings';
-} else {
-  allListings = data || [];
-  applyFilters();
-}
+const grid=document.querySelector('#listings-grid'),countEl=document.querySelector('#result-count'),panel=document.querySelector('#filter-panel'),form=document.querySelector('#filters-form'),sort=document.querySelector('#sort'),params=new URLSearchParams(location.search);let rows=[];
+['source_type','trust','neighbourhood','property_type','min_price','max_price','max_total','bedrooms','availability_status'].forEach(n=>{const el=form?.elements.namedItem(n);if(el&&params.has(n))el.value=params.get(n)});if(sort)sort.value=params.get('sort')||'newest';
+document.querySelector('#mobile-filter-btn')?.addEventListener('click',()=>panel?.classList.toggle('open'));
+function filters(){const o=Object.fromEntries(new FormData(form).entries());o.sort=sort?.value||'newest';return o}
+function sync(f){const p=new URLSearchParams();Object.entries(f).forEach(([k,v])=>{if(v&&!(k==='sort'&&v==='newest'))p.set(k,v)});history.replaceState({},'',`/listings${p.toString()?`?${p}`:''}`)}
+function chips(f){const wrap=document.querySelector('#active-filters');if(!wrap)return;const labels={source_type:'Source',trust:'Trust',neighbourhood:'Area',property_type:'Type',min_price:'Min rent',max_price:'Max rent',max_total:'Max move-in',bedrooms:'Bedrooms',availability_status:'Status'};wrap.innerHTML=Object.entries(f).filter(([k,v])=>k!=='sort'&&v).map(([k,v])=>`<span class="filter-chip">${labels[k]||titleCase(k)}: ${titleCase(v)}</span>`).join('')}
+function apply(){const f=filters();let out=[...rows];if(f.source_type)out=out.filter(x=>x.source_type===f.source_type);if(f.trust==='property_checked')out=out.filter(x=>x.verification_status==='property_checked');if(f.trust==='verified_agent')out=out.filter(x=>x.agent_verification_status==='verified');if(f.neighbourhood){const q=f.neighbourhood.toLowerCase();out=out.filter(x=>`${x.neighbourhood||''} ${x.location||''}`.toLowerCase().includes(q))}if(f.property_type)out=out.filter(x=>String(x.property_type).toLowerCase()===f.property_type.toLowerCase());if(f.min_price)out=out.filter(x=>Number(x.price)>=Number(f.min_price));if(f.max_price)out=out.filter(x=>Number(x.price)<=Number(f.max_price));if(f.max_total)out=out.filter(x=>Number(x.total_move_in_cost)<=Number(f.max_total));if(f.bedrooms)out=out.filter(x=>Number(x.bedrooms||0)>=Number(f.bedrooms));if(f.availability_status)out=out.filter(x=>x.availability_status===f.availability_status);if(f.sort==='price-asc')out.sort((a,b)=>Number(a.price)-Number(b.price));else if(f.sort==='price-desc')out.sort((a,b)=>Number(b.price)-Number(a.price));else if(f.sort==='total-asc')out.sort((a,b)=>Number(a.total_move_in_cost)-Number(b.total_move_in_cost));else out.sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));countEl.textContent=`${out.length} ${out.length===1?'home':'homes'}`;chips(f);grid.innerHTML=out.length?out.map(propertyCard).join(''):emptyListings('No homes match those filters yet. Try a wider search or create an account to post an apartment.');sync(f)}
+form?.addEventListener('submit',e=>{e.preventDefault();apply();panel?.classList.remove('open')});sort?.addEventListener('change',apply);document.querySelector('#clear-filters')?.addEventListener('click',()=>{form.reset();sort.value='newest';apply()});
+grid.innerHTML=skeletonCards(6);const{data,error}=await supabase.from('marketplace_listings').select('*').order('published_at',{ascending:false});if(error){console.error(error);countEl.textContent='Unable to load homes';grid.innerHTML=emptyListings('Listings are temporarily unavailable.')}else{rows=data||[];apply()}
