@@ -1,5 +1,5 @@
 import { supabase } from './config.js';
-import { escapeHTML } from './common.js';
+import { escapeHTML } from './common.js?v=marketplace-20260824';
 
 const grid=document.querySelector('#agent-grid'),count=document.querySelector('#agent-count'),input=document.querySelector('#agent-search');let agents=[];
 function initials(name='Agent'){return name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()}
