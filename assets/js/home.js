@@ -1,5 +1,5 @@
 import { supabase } from './config.js';
-import { buildQuery, emptyListings, propertyCard, skeletonCards } from './common.js';
+import { buildQuery, emptyListings, propertyCard, skeletonCards } from './common.js?v=marketplace-20260824';
 
 const grid=document.querySelector('#featured-grid');
 if(grid){
