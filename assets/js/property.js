@@ -1,145 +1,21 @@
 import { supabase } from './config.js';
-import { escapeHTML, listingWhatsApp, money, propertyCard, titleCase, toast, setLoading } from './common.js';
+import { currentSession, dateFmt, escapeHTML, money, titleCase, toast, trustBadge, setLoading } from './common.js';
 
-const segments = location.pathname.split('/').filter(Boolean);
-const slug = segments[0] === 'listings' && segments.length > 1 ? decodeURIComponent(segments.slice(1).join('/')) : new URLSearchParams(location.search).get('slug');
-const root = document.querySelector('#property-root');
-let listing = null;
-let media = [];
-let lightIndex = 0;
-
-function notFound() {
-  root.innerHTML = `<div class="container"><div class="empty-state" style="margin:60px 0"><div class="icon">⌂</div><h3>Property not found</h3><p>This listing may have been removed, unpublished or the link may be incorrect.</p><a class="btn btn-primary" href="/listings">Browse current listings</a></div></div>`;
-  document.title = 'Property not found | Lagos4Rent';
-}
-
-function mediaCell(item, cls='') {
-  if (!item) return `<div class="gallery-cell ${cls}"><div class="property-placeholder"><img src="/assets/img/lagos4rent-logo.svg" alt=""></div></div>`;
-  const content = item.media_type === 'video'
-    ? `<video src="${escapeHTML(item.public_url)}" muted playsinline preload="metadata"></video>`
-    : `<img src="${escapeHTML(item.public_url)}" alt="${escapeHTML(item.alt_text || listing.title)}">`;
-  return `<div class="gallery-cell ${cls}" data-media-id="${escapeHTML(item.id)}">${content}</div>`;
-}
-
-function renderGallery() {
-  const gallery = document.querySelector('#media-gallery');
-  const ordered = [...media].sort((a,b) => Number(b.is_cover)-Number(a.is_cover) || Number(a.sort_order)-Number(b.sort_order));
-  gallery.innerHTML = `${mediaCell(ordered[0], 'gallery-main')}${mediaCell(ordered[1])}${mediaCell(ordered[2])}${ordered.length > 3 ? `<button class="gallery-more" id="gallery-more">View all ${ordered.length}</button>` : ''}`;
-  gallery.querySelectorAll('[data-media-id]').forEach(el => el.addEventListener('click', () => {
-    const id = el.dataset.mediaId;
-    lightIndex = ordered.findIndex(m => m.id === id);
-    openLightbox(ordered);
-  }));
-  document.querySelector('#gallery-more')?.addEventListener('click', () => { lightIndex = 0; openLightbox(ordered); });
-}
-
-function openLightbox(ordered = media) {
-  if (!ordered.length) return;
-  const box = document.querySelector('#lightbox');
-  box.dataset.order = JSON.stringify(ordered.map(x => x.id));
-  renderLightbox(ordered);
-  box.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function renderLightbox(ordered) {
-  const item = ordered[lightIndex];
-  if (!item) return;
-  document.querySelector('#lightbox-media').innerHTML = item.media_type === 'video'
-    ? `<video src="${escapeHTML(item.public_url)}" controls autoplay playsinline></video>`
-    : `<img src="${escapeHTML(item.public_url)}" alt="${escapeHTML(item.alt_text || listing.title)}">`;
-}
-
-function closeLightbox() {
-  const box = document.querySelector('#lightbox');
-  box.classList.remove('open');
-  document.querySelector('#lightbox-media').innerHTML = '';
-  document.body.style.overflow = '';
-}
-
-document.querySelector('#lightbox-close')?.addEventListener('click', closeLightbox);
-document.querySelector('#lightbox')?.addEventListener('click', (e) => { if (e.target.id === 'lightbox') closeLightbox(); });
-document.querySelector('#lightbox-prev')?.addEventListener('click', () => {
-  const order = JSON.parse(document.querySelector('#lightbox').dataset.order || '[]');
-  const ordered = order.map(id => media.find(m => m.id === id)).filter(Boolean);
-  lightIndex = (lightIndex - 1 + ordered.length) % ordered.length; renderLightbox(ordered);
-});
-document.querySelector('#lightbox-next')?.addEventListener('click', () => {
-  const order = JSON.parse(document.querySelector('#lightbox').dataset.order || '[]');
-  const ordered = order.map(id => media.find(m => m.id === id)).filter(Boolean);
-  lightIndex = (lightIndex + 1) % ordered.length; renderLightbox(ordered);
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
-
-if (!slug) notFound();
-else {
-  const { data, error } = await supabase.from('listings_public').select('*').eq('slug', slug).maybeSingle();
-  if (error || !data) {
-    console.error(error);
-    notFound();
-  } else {
-    listing = data;
-    const mediaResult = await supabase.from('listing_media').select('*').eq('listing_id', listing.id).order('sort_order', {ascending:true});
-    media = mediaResult.data || [];
-
-    document.title = `${listing.title} | Lagos4Rent Real Estate`;
-    document.querySelector('meta[name="description"]')?.setAttribute('content', `${listing.title} in ${listing.neighbourhood || listing.location}. ${money(listing.price)}. View details and enquire with Lagos4Rent.`);
-
-    const wa = listingWhatsApp(listing);
-    const freq = listing.purpose === 'rent' && listing.rent_frequency ? titleCase(listing.rent_frequency) : '';
-    const facts = [
-      ['Beds', listing.bedrooms], ['Baths', listing.bathrooms], ['Toilets', listing.toilets], ['Parking', listing.parking_spaces], ['Size', listing.size_sqm ? `${Number(listing.size_sqm).toLocaleString()} sqm` : null]
-    ].filter(([,v]) => v !== null && v !== undefined && v !== '');
-    const amenities = Array.isArray(listing.amenities) ? listing.amenities : [];
-    const statusClass = listing.availability_status === 'available' ? 'success' : listing.availability_status === 'reserved' ? 'warning' : 'danger';
-
-    root.innerHTML = `<div class="container detail-wrap">
-      <div class="breadcrumbs"><a href="/">Home</a> / <a href="/listings">Listings</a> / ${escapeHTML(listing.reference_code)}</div>
-      <div class="detail-head"><div><div class="badges" style="position:static;margin-bottom:12px"><span class="badge">${escapeHTML(titleCase(listing.purpose))}</span><span class="badge ${statusClass}">${escapeHTML(titleCase(listing.availability_status))}</span>${listing.featured ? '<span class="badge orange">Featured</span>' : ''}</div><h1>${escapeHTML(listing.title)}</h1><div class="detail-sub">${escapeHTML(listing.neighbourhood)}, ${escapeHTML(listing.location)} · ${escapeHTML(listing.reference_code)}</div></div><div class="detail-price">${money(listing.price)}${freq ? `<small>per ${escapeHTML(freq.toLowerCase())}</small>` : ''}</div></div>
-      <div class="media-gallery" id="media-gallery"></div>
-      <div class="detail-grid"><div>
-        ${facts.length ? `<div class="fact-grid">${facts.map(([l,v]) => `<div class="fact"><strong>${escapeHTML(v)}</strong><span>${escapeHTML(l)}</span></div>`).join('')}</div>` : ''}
-        <section class="detail-section"><h3>About this property</h3><p>${escapeHTML(listing.description || 'Contact Lagos4Rent for more information about this property.')}</p></section>
-        <section class="detail-section"><h3>Property details</h3><div class="amenity-list"><div class="amenity">Property type: ${escapeHTML(listing.property_type)}</div><div class="amenity">Purpose: ${escapeHTML(titleCase(listing.purpose))}</div><div class="amenity">Furnished: ${listing.furnished ? 'Yes' : 'No'}</div><div class="amenity">Serviced: ${listing.serviced ? 'Yes' : 'No'}</div></div></section>
-        ${amenities.length ? `<section class="detail-section"><h3>Amenities</h3><div class="amenity-list">${amenities.map(a => `<div class="amenity">✓ ${escapeHTML(a)}</div>`).join('')}</div></section>` : ''}
-        <section class="detail-section"><button class="btn btn-outline" id="share-btn">Share property</button></section>
-        <section class="detail-section"><h3>Related listings</h3><div class="property-grid" id="related-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"></div></section>
-      </div><aside class="card inquiry-card"><h3>Interested in this property?</h3><p>Send the reference directly on WhatsApp, or leave your details below.</p><a class="btn btn-orange btn-block" href="${wa}" target="_blank" rel="noopener">Enquire on WhatsApp</a><div style="height:15px"></div><form id="property-enquiry"><div class="field"><label>Name *</label><input name="name" required></div><div class="field"><label>Phone *</label><input name="phone" required inputmode="tel"></div><div class="field"><label>Email</label><input name="email" type="email"></div><div class="field"><label>Message *</label><textarea name="message" required>I am interested in ${escapeHTML(listing.title)} (${escapeHTML(listing.reference_code)}).</textarea></div><button class="btn btn-primary btn-block" type="submit">Send enquiry</button></form></aside></div>
-    </div><div class="mobile-whatsapp"><a class="btn btn-orange btn-block" href="${wa}" target="_blank" rel="noopener">WhatsApp about ${escapeHTML(listing.reference_code)}</a></div>`;
-    renderGallery();
-
-    document.querySelector('#share-btn')?.addEventListener('click', async () => {
-      const shareData = { title: listing.title, text: `${listing.title} — ${money(listing.price)}`, url: location.href };
-      try {
-        if (navigator.share) await navigator.share(shareData);
-        else { await navigator.clipboard.writeText(location.href); toast('Property link copied.', 'success'); }
-      } catch (e) { if (e?.name !== 'AbortError') toast('Could not share this link.', 'error'); }
-    });
-
-    const enquiryForm = document.querySelector('#property-enquiry');
-    enquiryForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = enquiryForm.querySelector('button[type="submit"]');
-      setLoading(btn, true, 'Sending…');
-      const fd = new FormData(enquiryForm);
-      const payload = { listing_id: listing.id, property_reference: listing.reference_code, name: fd.get('name')?.trim(), phone: fd.get('phone')?.trim(), email: fd.get('email')?.trim() || null, message: fd.get('message')?.trim() };
-      const { error } = await supabase.from('enquiries').insert(payload);
-      setLoading(btn, false);
-      if (error) { console.error(error); toast('We could not send your enquiry. Please use WhatsApp instead.', 'error'); }
-      else { toast('Enquiry sent. Lagos4Rent will follow up.', 'success'); enquiryForm.reset(); }
-    });
-
-    const rel = await supabase.from('listings_public').select('*').neq('id', listing.id).limit(12);
-    const candidates = (rel.data || []).filter(x => x.neighbourhood === listing.neighbourhood || x.property_type === listing.property_type).slice(0,4);
-    const relatedGrid = document.querySelector('#related-grid');
-    relatedGrid.innerHTML = candidates.length ? candidates.map(propertyCard).join('') : `<p style="grid-column:1/-1;color:#6b778a">No related published listings yet.</p>`;
-
-    const jsonLd = {
-      '@context': 'https://schema.org', '@type': 'RealEstateListing', name: listing.title,
-      description: listing.description || undefined, url: location.href,
-      offers: { '@type': 'Offer', priceCurrency: 'NGN', price: Number(listing.price), availability: listing.availability_status === 'available' ? 'https://schema.org/InStock' : 'https://schema.org/LimitedAvailability' },
-      address: { '@type': 'PostalAddress', addressLocality: listing.neighbourhood, addressRegion: 'Lagos', addressCountry: 'NG' }
-    };
-    const script = document.createElement('script'); script.type = 'application/ld+json'; script.textContent = JSON.stringify(jsonLd); document.head.appendChild(script);
-  }
+const root=document.querySelector('#property-root');const parts=location.pathname.split('/').filter(Boolean);const slug=parts[0]==='listings'&&parts[1]?decodeURIComponent(parts.slice(1).join('/')):new URLSearchParams(location.search).get('slug');
+function missing(){root.innerHTML='<div class="container"><div class="empty-state" style="margin:60px 0"><div class="icon">⌂</div><h3>Property not found</h3><p>This home may have been removed or is no longer public.</p><a class="btn btn-primary" href="/listings">Browse homes</a></div></div>'}
+if(!slug){missing()}else{
+ const{data:l,error}=await supabase.from('marketplace_listings').select('*').eq('slug',slug).maybeSingle();if(error||!l){console.error(error);missing()}else{
+  const mediaRes=await supabase.from('listing_media').select('*').eq('listing_id',l.id).order('is_cover',{ascending:false}).order('sort_order',{ascending:true});const media=mediaRes.data||[];
+  document.title=`${l.title} | Lagos4Rent`;
+  const first=media[0];const mainMedia=first?(first.media_type==='video'?`<video src="${escapeHTML(first.public_url)}" controls playsinline></video>`:`<img src="${escapeHTML(first.public_url)}" alt="${escapeHTML(l.title)}">`):`<div class="property-placeholder"><img src="/assets/img/lagos4rent-official.svg" alt=""></div>`;
+  const thumbs=media.slice(1,5).map(m=>m.media_type==='video'?`<video src="${escapeHTML(m.public_url)}" muted playsinline></video>`:`<img src="${escapeHTML(m.public_url)}" alt="">`).join('');
+  const listerName=l.source_type==='tenant_direct'?'Current tenant':l.agency_name||l.lister_name||'Property lister';const agentLink=l.lister_account_type==='agent'?`/agents/${encodeURIComponent(l.created_by)}`:'';
+  const feeRows=[['Rent',l.price],['Agency fee',l.agency_fee],['Legal fee',l.legal_fee],['Caution fee',l.caution_fee],['Service charge',l.service_charge],[l.other_fees_label||'Other fees',l.other_fees]].filter(([,v])=>Number(v)>0);
+  const facts=[l.bedrooms!=null?`${l.bedrooms} bedrooms`:'',l.bathrooms!=null?`${l.bathrooms} bathrooms`:'',l.toilets!=null?`${l.toilets} toilets`:'',l.parking_spaces!=null?`${l.parking_spaces} parking`:'',l.size_sqm?`${Number(l.size_sqm).toLocaleString()} sqm`:''].filter(Boolean);
+  root.innerHTML=`<div class="container" style="padding:40px 0 80px"><div class="breadcrumbs"><a href="/">Home</a> / <a href="/listings">Homes</a> / ${escapeHTML(l.reference_code)}</div><div class="detail-head"><div>${trustBadge(l)}<h1 style="margin-top:12px">${escapeHTML(l.title)}</h1><div class="detail-sub">${escapeHTML(l.neighbourhood)}, ${escapeHTML(l.location)} · ${escapeHTML(l.reference_code)}</div></div><div class="detail-price">${money(l.price)}${l.rent_frequency?`<small>per ${escapeHTML(titleCase(l.rent_frequency).toLowerCase())}</small>`:''}</div></div><div class="property-layout-v2"><div class="property-main-v2"><div class="gallery-main">${mainMedia}</div>${thumbs?`<div class="media-thumbs" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px">${thumbs}</div>`:''}<div class="fact-grid" style="margin-top:24px">${facts.map(f=>`<div class="fact"><strong>${escapeHTML(f.split(' ')[0])}</strong><span>${escapeHTML(f.split(' ').slice(1).join(' '))}</span></div>`).join('')}</div><section class="detail-section"><h3>About this home</h3><p>${escapeHTML(l.description||'No description supplied.')}</p></section>${l.amenities?.length?`<section class="detail-section"><h3>Amenities</h3><div class="amenity-list">${l.amenities.map(a=>`<div class="amenity">✓ ${escapeHTML(a)}</div>`).join('')}</div></section>`:''}${l.source_type==='tenant_direct'?`<div class="tenant-disclaimer"><strong>Tenant Direct:</strong> This listing was submitted by a current renter who is moving out. Their post is an introduction only. Confirm the landlord or authorized property manager, final rent and tenancy terms before paying.</div>`:''}<button class="btn btn-outline report-link" id="report-toggle">Report this listing</button><div id="report-box" class="hidden" style="margin-top:12px"><div class="dash-section"><div class="field"><label>Reason</label><select id="report-reason"><option value="suspected_scam">Suspected scam</option><option value="misleading_information">Misleading information</option><option value="unauthorized_listing">Unauthorized listing</option><option value="duplicate_listing">Duplicate listing</option><option value="fee_issue">Fee issue</option><option value="harassment">Harassment</option><option value="other">Other</option></select></div><div class="field" style="margin-top:10px"><label>Details</label><textarea id="report-details" placeholder="Tell us what happened"></textarea></div><button class="btn btn-danger" id="report-submit" style="margin-top:10px">Submit report</button></div></div></div><aside class="property-side-v2"><div class="fee-card"><span class="eyebrow">Transparent move-in cost</span>${feeRows.map(([name,val])=>`<div class="fee-row"><span>${escapeHTML(name)}</span><strong>${money(val)}</strong></div>`).join('')}<div class="fee-row total"><span>Total move-in</span><span>${money(l.total_move_in_cost)}</span></div><small style="display:block;color:var(--muted);margin-top:10px">Always confirm final written terms before payment.</small></div><div class="lister-card"><div class="agent-top"><div class="avatar">${escapeHTML((listerName||'L').charAt(0).toUpperCase())}</div><div><strong>${escapeHTML(listerName)}</strong><div>${l.agent_verification_status==='verified'?'<span class="verified-mark">✓ Verified agent</span>':l.source_type==='tenant_direct'?'<span class="verified-mark" style="color:var(--tenant)">Tenant Direct</span>':'<span style="font-size:11px;color:var(--muted)">Not verified</span>'}</div></div></div>${l.agent_rating?`<div class="agent-stats"><div class="agent-stat"><strong>${Number(l.agent_rating).toFixed(1)}</strong><span>Rating</span></div><div class="agent-stat"><strong>${l.agent_review_count||0}</strong><span>Reviews</span></div><div class="agent-stat"><strong>${l.agent_completed_connections||0}</strong><span>Completed</span></div></div>`:''}${agentLink?`<a class="btn btn-outline btn-block" href="${agentLink}">View agent profile</a>`:''}</div><div class="action-card"><h3 style="color:var(--navy);margin-bottom:8px">Connect through Lagos4Rent</h3><p style="font-size:13px;color:var(--muted);margin-bottom:14px">Your request is recorded on the platform before you exchange further details.</p><textarea id="connection-message" style="width:100%;min-height:95px;border:1px solid var(--line);border-radius:10px;padding:10px">Hi, I am interested in ${escapeHTML(l.title)} (${escapeHTML(l.reference_code)}). Is it still available?</textarea><button class="btn btn-primary btn-block" id="connect-btn" style="margin-top:10px">Request connection</button><button class="btn btn-outline btn-block" id="save-btn" style="margin-top:8px">Save home</button></div></aside></div></div>`;
+  const session=await currentSession();const connect=document.querySelector('#connect-btn'),save=document.querySelector('#save-btn');if(session?.user?.id===l.created_by){connect.textContent='This is your listing';connect.disabled=true}
+  connect?.addEventListener('click',async()=>{if(!session){location.href=`/join?next=${encodeURIComponent(location.pathname)}`;return}const msg=document.querySelector('#connection-message').value.trim();if(!msg)return toast('Add a short message first.','error');setLoading(connect,true,'Sending…');const{error}=await supabase.from('connections').insert({listing_id:l.id,seeker_id:session.user.id,lister_id:l.created_by,message:msg});setLoading(connect,false);if(error){if(error.code==='23505')toast('You already requested a connection for this home.','error');else{console.error(error);toast('Could not send request.','error')}}else{toast('Connection request sent. Track it in your dashboard.','success');connect.textContent='Request sent';connect.disabled=true}});
+  save?.addEventListener('click',async()=>{if(!session){location.href=`/join?next=${encodeURIComponent(location.pathname)}`;return}const{error}=await supabase.from('saved_listings').upsert({user_id:session.user.id,listing_id:l.id});if(error)toast('Could not save this home.','error');else{toast('Home saved.','success');save.textContent='Saved'}});
+  document.querySelector('#report-toggle')?.addEventListener('click',()=>document.querySelector('#report-box').classList.toggle('hidden'));document.querySelector('#report-submit')?.addEventListener('click',async()=>{if(!session){location.href=`/join?next=${encodeURIComponent(location.pathname)}`;return}const details=document.querySelector('#report-details').value.trim();if(details.length<5)return toast('Please add a little more detail.','error');const reason=document.querySelector('#report-reason').value;const{error}=await supabase.from('reports').insert({reporter_id:session.user.id,listing_id:l.id,reported_user_id:l.created_by,reason,details});if(error){console.error(error);toast('Could not submit report.','error')}else{toast('Report submitted for review.','success');document.querySelector('#report-box').classList.add('hidden')}});
+ }
 }
