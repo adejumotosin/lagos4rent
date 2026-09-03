@@ -1,0 +1,19 @@
+{
+  "name": "lagos4rent",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write \"**/*.{js,json,html,css,md}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{js,json,html,css,md}\" --ignore-path .prettierignore",
+    "lint": "eslint assets/js api tests",
+    "test:e2e": "playwright test",
+    "test": "npm run lint && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "serve": "^14.2.4"
+  }
+}
