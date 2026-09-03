@@ -2,8 +2,9 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/listings", "destination": "/listings.html" },
-    { "source": "/listings/:slug", "destination": "/property.html" },
+    { "source": "/listings/:slug", "destination": "/api/property?slug=:slug" },
     { "source": "/agents", "destination": "/agents.html" },
     { "source": "/agents/:id", "destination": "/agent.html" },
     { "source": "/join", "destination": "/join.html" },
@@ -20,18 +21,26 @@
   ],
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://xpjdthhyfezdyhlzycin.supabase.co; media-src 'self' blob: https://xpjdthhyfezdyhlzycin.supabase.co; connect-src 'self' https://xpjdthhyfezdyhlzycin.supabase.co wss://xpjdthhyfezdyhlzycin.supabase.co; font-src 'self' data:; upgrade-insecure-requests" }
+      ]
+    },
+    {
       "source": "/admin/:path*",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
       ]
     },
     {
       "source": "/dashboard",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
       ]
     },
     {
