@@ -1,12 +1,189 @@
 import { supabase } from './config.js';
-import { emptyListings, propertyCard, skeletonCards, titleCase } from './common.js?v=marketplace-20260824';
+import { emptyListings, propertyCard, skeletonCards, titleCase } from './common.js?v=marketplace-20260903';
 
-const grid=document.querySelector('#listings-grid'),countEl=document.querySelector('#result-count'),panel=document.querySelector('#filter-panel'),form=document.querySelector('#filters-form'),sort=document.querySelector('#sort'),params=new URLSearchParams(location.search);let rows=[];
-['source_type','trust','neighbourhood','property_type','min_price','max_price','max_total','bedrooms','availability_status'].forEach(n=>{const el=form?.elements.namedItem(n);if(el&&params.has(n))el.value=params.get(n)});if(sort)sort.value=params.get('sort')||'newest';
-document.querySelector('#mobile-filter-btn')?.addEventListener('click',()=>panel?.classList.toggle('open'));
-function filters(){const o=Object.fromEntries(new FormData(form).entries());o.sort=sort?.value||'newest';return o}
-function sync(f){const p=new URLSearchParams();Object.entries(f).forEach(([k,v])=>{if(v&&!(k==='sort'&&v==='newest'))p.set(k,v)});history.replaceState({},'',`/listings${p.toString()?`?${p}`:''}`)}
-function chips(f){const wrap=document.querySelector('#active-filters');if(!wrap)return;const labels={source_type:'Source',trust:'Trust',neighbourhood:'Area',property_type:'Type',min_price:'Min rent',max_price:'Max rent',max_total:'Max move-in',bedrooms:'Bedrooms',availability_status:'Status'};wrap.innerHTML=Object.entries(f).filter(([k,v])=>k!=='sort'&&v).map(([k,v])=>`<span class="filter-chip">${labels[k]||titleCase(k)}: ${titleCase(v)}</span>`).join('')}
-function apply(){const f=filters();let out=[...rows];if(f.source_type)out=out.filter(x=>x.source_type===f.source_type);if(f.trust==='property_checked')out=out.filter(x=>x.verification_status==='property_checked');if(f.trust==='verified_agent')out=out.filter(x=>x.agent_verification_status==='verified');if(f.neighbourhood){const q=f.neighbourhood.toLowerCase();out=out.filter(x=>`${x.neighbourhood||''} ${x.location||''}`.toLowerCase().includes(q))}if(f.property_type)out=out.filter(x=>String(x.property_type).toLowerCase()===f.property_type.toLowerCase());if(f.min_price)out=out.filter(x=>Number(x.price)>=Number(f.min_price));if(f.max_price)out=out.filter(x=>Number(x.price)<=Number(f.max_price));if(f.max_total)out=out.filter(x=>Number(x.total_move_in_cost)<=Number(f.max_total));if(f.bedrooms)out=out.filter(x=>Number(x.bedrooms||0)>=Number(f.bedrooms));if(f.availability_status)out=out.filter(x=>x.availability_status===f.availability_status);if(f.sort==='price-asc')out.sort((a,b)=>Number(a.price)-Number(b.price));else if(f.sort==='price-desc')out.sort((a,b)=>Number(b.price)-Number(a.price));else if(f.sort==='total-asc')out.sort((a,b)=>Number(a.total_move_in_cost)-Number(b.total_move_in_cost));else out.sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));countEl.textContent=`${out.length} ${out.length===1?'home':'homes'}`;chips(f);grid.innerHTML=out.length?out.map(propertyCard).join(''):emptyListings('No homes match those filters yet. Try a wider search or create an account to post an apartment.');sync(f)}
-form?.addEventListener('submit',e=>{e.preventDefault();apply();panel?.classList.remove('open')});sort?.addEventListener('change',apply);document.querySelector('#clear-filters')?.addEventListener('click',()=>{form.reset();sort.value='newest';apply()});
-grid.innerHTML=skeletonCards(6);const{data,error}=await supabase.from('marketplace_listings').select('*').order('published_at',{ascending:false});if(error){console.error(error);countEl.textContent='Unable to load homes';grid.innerHTML=emptyListings('Listings are temporarily unavailable.')}else{rows=data||[];apply()}
+const PAGE_SIZE = 12;
+const grid = document.querySelector('#listings-grid');
+const countEl = document.querySelector('#result-count');
+const panel = document.querySelector('#filter-panel');
+const form = document.querySelector('#filters-form');
+const sort = document.querySelector('#sort');
+const pagination = document.querySelector('#pagination');
+const params = new URLSearchParams(location.search);
+
+const filterNames = [
+  'source_type',
+  'trust',
+  'neighbourhood',
+  'property_type',
+  'min_price',
+  'max_price',
+  'max_total',
+  'bedrooms',
+  'availability_status',
+];
+
+for (const name of filterNames) {
+  const element = form?.elements.namedItem(name);
+  if (element && params.has(name)) element.value = params.get(name);
+}
+if (sort) sort.value = params.get('sort') || 'newest';
+
+const initialPage = Math.max(1, Number.parseInt(params.get('page') || '1', 10) || 1);
+
+document.querySelector('#mobile-filter-btn')?.addEventListener('click', () => panel?.classList.toggle('open'));
+
+function filters() {
+  const values = Object.fromEntries(new FormData(form).entries());
+  values.sort = sort?.value || 'newest';
+  return values;
+}
+
+function syncUrl(values, page) {
+  const next = new URLSearchParams();
+  for (const [key, value] of Object.entries(values)) {
+    if (value && !(key === 'sort' && value === 'newest')) next.set(key, value);
+  }
+  if (page > 1) next.set('page', String(page));
+  history.replaceState({}, '', `/listings${next.toString() ? `?${next}` : ''}`);
+}
+
+function renderChips(values) {
+  const wrap = document.querySelector('#active-filters');
+  if (!wrap) return;
+  const labels = {
+    source_type: 'Source',
+    trust: 'Trust',
+    neighbourhood: 'Area',
+    property_type: 'Type',
+    min_price: 'Min rent',
+    max_price: 'Max rent',
+    max_total: 'Max move-in',
+    bedrooms: 'Bedrooms',
+    availability_status: 'Status',
+  };
+  wrap.innerHTML = Object.entries(values)
+    .filter(([key, value]) => key !== 'sort' && value)
+    .map(([key, value]) => `<span class="filter-chip">${labels[key] || titleCase(key)}: ${titleCase(value)}</span>`)
+    .join('');
+}
+
+function safeAreaSearch(value) {
+  return String(value || '')
+    .trim()
+    .replace(/[%,()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .slice(0, 80);
+}
+
+function buildDatabaseQuery(values) {
+  let query = supabase.from('marketplace_listings').select('*', { count: 'exact' });
+
+  if (values.source_type) query = query.eq('source_type', values.source_type);
+  if (values.trust === 'property_checked') query = query.eq('verification_status', 'property_checked');
+  if (values.trust === 'verified_agent') query = query.eq('agent_verification_status', 'verified');
+
+  const area = safeAreaSearch(values.neighbourhood);
+  if (area) query = query.ilike('neighbourhood', `%${area}%`);
+
+  if (values.property_type) query = query.eq('property_type', values.property_type);
+  if (values.min_price) query = query.gte('price', Number(values.min_price));
+  if (values.max_price) query = query.lte('price', Number(values.max_price));
+  if (values.max_total) query = query.lte('total_move_in_cost', Number(values.max_total));
+  if (values.bedrooms) query = query.gte('bedrooms', Number(values.bedrooms));
+  if (values.availability_status) query = query.eq('availability_status', values.availability_status);
+
+  if (values.sort === 'price-asc') query = query.order('price', { ascending: true });
+  else if (values.sort === 'price-desc') query = query.order('price', { ascending: false });
+  else if (values.sort === 'total-asc') query = query.order('total_move_in_cost', { ascending: true });
+  else query = query.order('published_at', { ascending: false });
+
+  return query;
+}
+
+function renderPagination(page, total) {
+  if (!pagination) return;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (pages <= 1) {
+    pagination.innerHTML = '';
+    return;
+  }
+
+  const buttons = [];
+  const start = Math.max(1, page - 2);
+  const end = Math.min(pages, page + 2);
+
+  buttons.push(`<button class="btn btn-outline btn-sm" data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>Previous</button>`);
+  if (start > 1) buttons.push('<span class="pagination-gap">…</span>');
+  for (let value = start; value <= end; value += 1) {
+    buttons.push(`<button class="pagination-page ${value === page ? 'active' : ''}" data-page="${value}" aria-current="${value === page ? 'page' : 'false'}">${value}</button>`);
+  }
+  if (end < pages) buttons.push('<span class="pagination-gap">…</span>');
+  buttons.push(`<button class="btn btn-outline btn-sm" data-page="${page + 1}" ${page === pages ? 'disabled' : ''}>Next</button>`);
+
+  pagination.innerHTML = buttons.join('');
+  pagination.querySelectorAll('[data-page]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = Number(button.dataset.page);
+      if (target >= 1 && target <= pages && target !== page) loadListings(target, { scroll: true });
+    });
+  });
+}
+
+async function loadListings(page = 1, { scroll = false } = {}) {
+  const values = filters();
+  renderChips(values);
+  grid.innerHTML = skeletonCards(6);
+  countEl.textContent = 'Loading homes…';
+  if (pagination) pagination.innerHTML = '';
+
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  const { data, count, error } = await buildDatabaseQuery(values).range(from, to);
+
+  if (error) {
+    console.error(error);
+    countEl.textContent = 'Unable to load homes';
+    grid.innerHTML = emptyListings('Listings are temporarily unavailable.');
+    return;
+  }
+
+  const total = count || 0;
+  const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (page > maxPage && total > 0) {
+    await loadListings(maxPage, { scroll });
+    return;
+  }
+
+  const rows = data || [];
+  const firstShown = total ? from + 1 : 0;
+  const lastShown = Math.min(from + rows.length, total);
+  countEl.textContent = total
+    ? `Showing ${firstShown}–${lastShown} of ${total} ${total === 1 ? 'home' : 'homes'}`
+    : '0 homes';
+
+  grid.innerHTML = rows.length
+    ? rows.map(propertyCard).join('')
+    : emptyListings('No homes match those filters yet. Try a wider search or create an account to post an apartment.');
+
+  renderPagination(page, total);
+  syncUrl(values, page);
+  if (scroll) document.querySelector('.listings-toolbar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+form?.addEventListener('submit', (event) => {
+  event.preventDefault();
+  panel?.classList.remove('open');
+  loadListings(1);
+});
+
+sort?.addEventListener('change', () => loadListings(1));
+
+document.querySelector('#clear-filters')?.addEventListener('click', () => {
+  form.reset();
+  sort.value = 'newest';
+  loadListings(1);
+});
+
+window.addEventListener('popstate', () => location.reload());
+
+await loadListings(initialPage);
