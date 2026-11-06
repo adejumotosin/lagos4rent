@@ -17,7 +17,7 @@ const params = new URLSearchParams(location.search);
 const intent = params.get('intent');
 const hasSignupIntent = intent === 'post' || intent === 'agent';
 const requestedNext = params.get('next');
-const intentDefault = intent === 'post' ? '/dashboard#post' : intent === 'agent' ? '/dashboard#profile' : '/dashboard';
+const intentDefault = intent === 'post' ? '/dashboard?mode=renter#post' : intent === 'agent' ? '/dashboard?mode=agent#profile' : '/dashboard';
 const next = requestedNext && requestedNext.startsWith('/') && !requestedNext.startsWith('//') ? requestedNext : intentDefault;
 
 let mode = hasSignupIntent ? 'signup' : 'login';
@@ -75,14 +75,14 @@ if (session && !hasSignupIntent) {
   location.replace(next);
 } else if (session && hasSignupIntent) {
   const roleLabel = accountType === 'agent' ? 'agent' : 'renter';
-  const continueHref = intent === 'post' ? '/dashboard#post' : '/dashboard#profile';
-  const createLabel = accountType === 'agent' ? 'Sign out & create agent account' : 'Sign out & create renter account';
+  const continueHref = intent === 'post' ? '/dashboard?mode=renter#post' : '/dashboard?mode=agent#profile';
+  const createLabel = accountType === 'agent' ? 'Sign out & use another agent account' : 'Sign out & use another renter account';
 
   if (authSwitch) authSwitch.classList.add('hidden');
   if (signupOptions) signupOptions.classList.add('hidden');
   if (form) form.classList.add('hidden');
   if (title) title.textContent = 'You are already signed in';
-  if (sub) sub.textContent = `This browser is currently signed in as ${session.user.email || 'an existing Lagos4Rent user'}. You can continue with this account, or sign out to register a separate ${roleLabel} account.`;
+  if (sub) sub.textContent = `This browser is currently signed in as ${session.user.email || 'an existing Lagos4Rent user'}. You can continue in ${roleLabel} mode with this account, or sign out to use another account.`;
   if (message) {
     message.innerHTML = `
       <div style="display:grid;gap:10px;margin-top:10px">
