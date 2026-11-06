@@ -16,8 +16,8 @@ export function setLoading(button,loading,label='Please wait…'){
 }
 export function trustBadge(listing){
   if(listing.verification_status==='property_checked') return '<span class="trust-pill verified">✓ Property checked</span>';
-  if(listing.agent_verification_status==='verified') return '<span class="trust-pill verified">✓ Verified agent</span>';
   if(listing.source_type==='tenant_direct') return '<span class="trust-pill tenant">Tenant Direct</span>';
+  if(listing.agent_verification_status==='verified') return '<span class="trust-pill verified">✓ Verified agent</span>';
   return '<span class="trust-pill neutral">Unverified listing</span>';
 }
 export function propertyCard(listing){
