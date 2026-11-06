@@ -1,6 +1,6 @@
 const SUPABASE_URL = 'https://xpjdthhyfezdyhlzycin.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_AhOJgBmlPzsduDMSUIwLSA_fZFv9Ofu';
-const SITE_URL = 'https://lagos4rent.vercel.app';
+const SITE_URL = 'https://lagosforrent.com';
 
 const escapeHTML = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
 const money = (value) => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(Number(value || 0));
