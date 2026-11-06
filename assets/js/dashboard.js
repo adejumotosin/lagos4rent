@@ -17,7 +17,11 @@ if (!session) {
 
 const uid = session.user.id;
 const postForm = document.querySelector('#post-form');
-const draftKey = `lagos4rent:post-draft:${uid}`;
+const dashboardParams = new URLSearchParams(location.search);
+const requestedMode = ['renter', 'agent'].includes(dashboardParams.get('mode')) ? dashboardParams.get('mode') : null;
+let dashboardMode = 'renter';
+let hasAgentCapability = false;
+const draftKey = () => `lagos4rent:post-draft:${uid}:${dashboardMode}`;
 let profile = null;
 let agentProfile = null;
 let myListings = [];
@@ -53,7 +57,7 @@ function serialisePostDraft() {
 
 function savePostDraft() {
   try {
-    localStorage.setItem(draftKey, JSON.stringify(serialisePostDraft()));
+    localStorage.setItem(draftKey(), JSON.stringify(serialisePostDraft()));
     const note = document.querySelector('#autosave-note');
     if (note) note.textContent = `Saved ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   } catch (error) {
@@ -67,11 +71,11 @@ function schedulePostDraftSave() {
 }
 
 function clearPostDraft({ resetForm = false } = {}) {
-  localStorage.removeItem(draftKey);
+  localStorage.removeItem(draftKey());
   document.querySelector('#draft-status')?.classList.add('hidden');
   if (resetForm) {
     postForm.reset();
-    if (profile?.account_type !== 'agent') {
+    if (dashboardMode !== 'agent') {
       postForm.agency_fee.value = '0';
       postForm.agency_fee.disabled = true;
     }
@@ -84,9 +88,9 @@ function clearPostDraft({ resetForm = false } = {}) {
 function restorePostDraft() {
   let draft;
   try {
-    draft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+    draft = JSON.parse(localStorage.getItem(draftKey()) || 'null');
   } catch {
-    localStorage.removeItem(draftKey);
+    localStorage.removeItem(draftKey());
     return;
   }
   if (!draft?.values) return;
@@ -98,7 +102,7 @@ function restorePostDraft() {
     else field.value = value;
   }
 
-  if (profile?.account_type !== 'agent') {
+  if (dashboardMode !== 'agent') {
     postForm.agency_fee.value = '0';
     postForm.agency_fee.disabled = true;
   }
@@ -119,20 +123,48 @@ async function loadProfile() {
   }
 
   profile = data || { account_type: 'renter' };
-  document.querySelector('#account-label').textContent = profile.account_type === 'agent' ? 'Agent account' : 'Renter account';
   document.querySelector('#profile-form').full_name.value = profile.full_name || '';
   document.querySelector('#profile-form').phone.value = profile.phone || '';
   document.querySelector('#profile-form').bio.value = profile.bio || '';
-  document.querySelector('#tenant-confirm-wrap').classList.toggle('hidden', profile.account_type === 'agent');
 
-  if (profile.account_type === 'agent') {
+  const agentResult = await supabase.from('agent_profiles').select('*').eq('user_id', uid).maybeSingle();
+  if (agentResult.error) console.warn('Could not load agent capability', agentResult.error);
+  agentProfile = agentResult.data || null;
+  hasAgentCapability = Boolean(agentProfile);
+
+  if (requestedMode === 'agent' && hasAgentCapability) dashboardMode = 'agent';
+  else if (requestedMode === 'renter') dashboardMode = 'renter';
+  else dashboardMode = hasAgentCapability && profile.account_type === 'agent' ? 'agent' : 'renter';
+
+  renderDashboardMode();
+}
+
+function renderDashboardMode() {
+  const modeSwitch = document.querySelector('#dashboard-mode-switch');
+  modeSwitch?.classList.toggle('hidden', !hasAgentCapability);
+  document.querySelectorAll('[data-dashboard-mode]').forEach((button) => {
+    button.classList.toggle('active', button.dataset.dashboardMode === dashboardMode);
+    button.onclick = () => {
+      const params = new URLSearchParams(location.search);
+      params.set('mode', button.dataset.dashboardMode);
+      const hash = location.hash || '#overview';
+      location.href = `/dashboard?${params.toString()}${hash}`;
+    };
+  });
+
+  document.querySelector('#account-label').textContent = dashboardMode === 'agent'
+    ? 'Agent mode · listings are submitted as agent listings'
+    : 'Renter mode · browse, save and use Tenant Direct';
+
+  document.querySelector('#tenant-confirm-wrap').classList.toggle('hidden', dashboardMode === 'agent');
+
+  if (dashboardMode === 'agent') {
     document.querySelector('#agent-profile-box').classList.remove('hidden');
     document.querySelector('#become-agent-box').classList.add('hidden');
     document.querySelector('#post-title').textContent = 'Submit an agent listing';
+    document.querySelector('#post-note').textContent = 'Agent listings are reviewed before they become public.';
     postForm.agency_fee.disabled = false;
 
-    const { data: agent } = await supabase.from('agent_profiles').select('*').eq('user_id', uid).maybeSingle();
-    agentProfile = agent || null;
     const agentForm = document.querySelector('#agent-form');
     if (agentProfile) {
       agentForm.agency_name.value = agentProfile.agency_name || '';
@@ -141,11 +173,13 @@ async function loadProfile() {
       agentForm.years_experience.value = agentProfile.years_experience ?? '';
       agentForm.areas_served.value = (agentProfile.areas_served || []).join(', ');
       agentForm.bio.value = agentProfile.bio || '';
-      document.querySelector('#stat-trust').textContent = titleCase(agentProfile.verification_status);
+      document.querySelector('#stat-trust').textContent = titleCase(agentProfile.verification_status || 'unverified');
+    } else {
+      document.querySelector('#stat-trust').textContent = 'Unverified';
     }
   } else {
     document.querySelector('#agent-profile-box').classList.add('hidden');
-    document.querySelector('#become-agent-box').classList.remove('hidden');
+    document.querySelector('#become-agent-box').classList.toggle('hidden', hasAgentCapability);
     document.querySelector('#post-title').textContent = 'Post your apartment with Tenant Direct';
     document.querySelector('#post-note').textContent = 'Tell future renters about the apartment you are leaving. We review every submission before it becomes public. Tenant Direct does not mean you have authority to grant a tenancy.';
     postForm.agency_fee.value = '0';
@@ -503,14 +537,14 @@ postForm.addEventListener('submit', async (event) => {
     description: String(formData.get('description')).trim(),
     amenities: String(formData.get('amenities') || '').split(',').map((item) => item.trim()).filter(Boolean),
     available_from: formData.get('available_from') || null,
-    agency_fee: profile.account_type === 'agent' ? numberValue('agency_fee') : 0,
+    agency_fee: dashboardMode === 'agent' ? numberValue('agency_fee') : 0,
     legal_fee: numberValue('legal_fee'),
     caution_fee: numberValue('caution_fee'),
     service_charge: numberValue('service_charge'),
     other_fees: numberValue('other_fees'),
     other_fees_label: String(formData.get('other_fees_label') || '').trim() || null,
-    source_type: profile.account_type === 'agent' ? 'agent' : 'tenant_direct',
-    landlord_contact_confirmed: profile.account_type === 'agent' ? false : formData.get('landlord_contact_confirmed') === 'on',
+    source_type: dashboardMode === 'agent' ? 'agent' : 'tenant_direct',
+    landlord_contact_confirmed: dashboardMode === 'agent' ? false : formData.get('landlord_contact_confirmed') === 'on',
     created_by: uid,
   };
 
@@ -552,7 +586,7 @@ postForm.addEventListener('submit', async (event) => {
   setLoading(button, false);
   toast(`Submitted ${listing.reference_code} for Lagos4Rent review.`, 'success');
   form.reset();
-  if (profile.account_type !== 'agent') {
+  if (dashboardMode !== 'agent') {
     form.agency_fee.value = '0';
     form.agency_fee.disabled = true;
   }
@@ -575,11 +609,11 @@ document.querySelector('#profile-form').addEventListener('submit', async (event)
 
 document.querySelector('#become-agent').onclick = async () => {
   if (!confirm('Switch this account to an agent profile? You can still browse homes, but listings you submit will be identified as agent listings.')) return;
-  const update = await supabase.from('profiles').update({ account_type: 'agent' }).eq('id', uid);
-  if (update.error) return toast('Could not switch account.', 'error');
   const create = await supabase.from('agent_profiles').insert({ user_id: uid });
   if (create.error && create.error.code !== '23505') return toast('Could not create agent profile.', 'error');
-  location.reload();
+  const update = await supabase.from('profiles').update({ account_type: 'agent' }).eq('id', uid);
+  if (update.error) console.warn('Agent profile created but profile label could not be updated', update.error);
+  location.href = '/dashboard?mode=agent#profile';
 };
 
 document.querySelector('#agent-form').addEventListener('submit', async (event) => {
