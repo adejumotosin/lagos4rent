@@ -4,8 +4,8 @@ Production-ready website and admin CMS for Lagos4Rent.
 
 ## Live deployment
 
-- Public website: https://lagos4rent.vercel.app
-- Admin: https://lagos4rent.vercel.app/admin
+- Public website: https://lagosforrent.com
+- Admin: https://lagosforrent.com/admin
 
 ## Features
 
