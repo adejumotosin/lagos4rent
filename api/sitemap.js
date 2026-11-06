@@ -1,6 +1,6 @@
 const SUPABASE_URL = 'https://xpjdthhyfezdyhlzycin.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_AhOJgBmlPzsduDMSUIwLSA_fZFv9Ofu';
-const SITE_URL = 'https://lagos4rent.vercel.app';
+const SITE_URL = 'https://lagosforrent.com';
 
 async function supabaseRest(path) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
