@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://lagos4rent.vercel.app/sitemap.xml
+Sitemap: https://lagosforrent.com/sitemap.xml
