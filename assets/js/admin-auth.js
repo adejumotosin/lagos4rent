@@ -67,7 +67,7 @@ form?.addEventListener('submit', async (e) => {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: 'https://lagos4rent.vercel.app/admin'
+          emailRedirectTo: 'https://lagosforrent.com/admin'
         }
       });
       if (error) throw error;
