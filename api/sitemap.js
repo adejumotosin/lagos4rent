@@ -17,7 +17,7 @@ async function supabaseRest(path) {
 const xmlEscape = (value = '') => String(value).replace(/[<>&'\"]/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[char]));
 
 export default async function handler(req, res) {
-  const staticRoutes = ['/', '/listings', '/agents', '/safety', '/about', '/contact', '/join'];
+  const staticRoutes = ['/', '/listings', '/agents', '/safety', '/about', '/contact'];
   let listings = [];
   let agents = [];
 

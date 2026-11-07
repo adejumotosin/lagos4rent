@@ -107,7 +107,9 @@ if (!slug) {
     const media = mediaResult.data || [];
 
     document.title = `${listing.title} | Lagos4Rent`;
-    document.querySelector('meta[name="description"]')?.setAttribute('content', `${listing.title} in ${listing.neighbourhood || listing.location}. See transparent move-in costs and Lagos4Rent trust signals.`);
+    const locationLabel = [listing.neighbourhood, listing.location].filter(Boolean).join(', ') || 'Lagos';
+    const rentLabel = `${money(listing.price)}${listing.rent_frequency ? ` per ${listing.rent_frequency}` : ''}`;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', `${listing.title} in ${locationLabel}. Rent ${rentLabel}. Total move-in cost ${money(listing.total_move_in_cost || listing.price)}. View photos, fees and request a connection.`);
 
     const listerName = listing.source_type === 'tenant_direct'
       ? 'Current tenant'
