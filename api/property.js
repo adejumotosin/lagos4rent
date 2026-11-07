@@ -97,7 +97,8 @@ export default async function handler(req, res) {
     }
 
     const location = [listing.neighbourhood, listing.location].filter(Boolean).join(', ');
-    const rentLabel = `${money(listing.price)}${listing.rent_frequency ? ` per ${listing.rent_frequency}` : ''}`;
+    const rentPeriod = { yearly: 'year', monthly: 'month', quarterly: 'quarter' }[listing.rent_frequency] || listing.rent_frequency;
+    const rentLabel = `${money(listing.price)}${rentPeriod ? ` per ${rentPeriod}` : ''}`;
     const description = `${listing.title} in ${location || 'Lagos'}. Rent ${rentLabel}. Total move-in cost ${money(listing.total_move_in_cost || listing.price)}. View photos, fees and request a connection.`;
     const canonical = `${SITE_URL}/listings/${encodeURIComponent(listing.slug)}`;
     const image = listing.cover_url || `${SITE_URL}/assets/img/lagos4rent-official.svg`;
