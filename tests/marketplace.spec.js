@@ -12,7 +12,7 @@ test('moving-out intent opens renter registration instead of redirecting away', 
   await expect(page).toHaveURL(/\/join\?intent=post$/);
   await expect(page.getByRole('heading', { name: /Create your Lagos4Rent account/i })).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('button', { name: /I’m a renter/i })).toHaveClass(/active/);
-  await expect(page.getByRole('button', { name: /Create account/i })).toBeVisible();
+  await expect(page.locator('#auth-form').getByRole('button', { name: 'Create account', exact: true })).toBeVisible();
 });
 
 test('agent intent selects agent registration', async ({ page }) => {
