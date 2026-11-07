@@ -521,7 +521,7 @@ postForm.addEventListener('submit', async (event) => {
   const button = document.querySelector('#post-submit');
   const formData = new FormData(form);
   const numberValue = (name) => {
-    const raw = String(formData.get(name) ?? '').trim().replace(/[₦,\\s]/g, '');
+    const raw = String(formData.get(name) ?? '').trim().replace(/[₦,\s]/g, '');
     return raw ? Number(raw) : 0;
   };
   const amountFields = ['price', 'agency_fee', 'legal_fee', 'caution_fee', 'service_charge', 'other_fees'];
