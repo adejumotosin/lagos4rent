@@ -8,26 +8,28 @@ test('homepage presents Lagos4Rent as a trust-first marketplace', async ({ page 
 });
 
 test('moving-out intent opens renter registration instead of redirecting away', async ({ page }) => {
-  await page.goto('/join.html?intent=post');
+  await page.goto('/join?intent=post');
+  await expect(page).toHaveURL(/\/join\?intent=post$/);
   await expect(page.getByRole('heading', { name: /Create your Lagos4Rent account/i })).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('button', { name: /I’m a renter/i })).toHaveClass(/active/);
   await expect(page.getByRole('button', { name: /Create account/i })).toBeVisible();
 });
 
 test('agent intent selects agent registration', async ({ page }) => {
-  await page.goto('/join.html?intent=agent');
+  await page.goto('/join?intent=agent');
+  await expect(page).toHaveURL(/\/join\?intent=agent$/);
   await expect(page.getByRole('heading', { name: /Create your Lagos4Rent account/i })).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('button', { name: /I’m an agent/i })).toHaveClass(/active/);
 });
 
 test('browse page exposes trust and cost filters', async ({ page }) => {
-  await page.goto('/listings.html');
+  await page.goto('/listings');
   await expect(page.getByRole('heading', { name: /Find a home, not a question mark/i })).toBeVisible();
   await expect(page.getByLabel('Trust level')).toBeVisible();
   await expect(page.getByLabel('Maximum total move-in')).toBeVisible();
 });
 
 test('safety guide is accessible before signup', async ({ page }) => {
-  await page.goto('/safety.html');
+  await page.goto('/safety');
   await expect(page.locator('body')).toContainText(/safety|verify|payment/i);
 });
