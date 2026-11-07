@@ -99,6 +99,7 @@ function restorePostDraft() {
     const field = postForm.elements.namedItem(name);
     if (!field || name === 'media') continue;
     if (field.type === 'checkbox') field.checked = value === 'on' || value === true;
+    else if (name === 'rent_frequency') field.value = ({ year: 'yearly', month: 'monthly', quarter: 'quarterly' }[value] || value);
     else field.value = value;
   }
 
@@ -519,7 +520,19 @@ postForm.addEventListener('submit', async (event) => {
   const form = event.currentTarget;
   const button = document.querySelector('#post-submit');
   const formData = new FormData(form);
-  const numberValue = (name) => Number(formData.get(name) || 0);
+  const numberValue = (name) => {
+    const raw = String(formData.get(name) ?? '').trim().replace(/[₦,\\s]/g, '');
+    return raw ? Number(raw) : 0;
+  };
+  const amountFields = ['price', 'agency_fee', 'legal_fee', 'caution_fee', 'service_charge', 'other_fees'];
+  if (amountFields.some((name) => !Number.isFinite(numberValue(name)) || numberValue(name) < 0)) {
+    toast('Please enter valid non-negative amounts for rent and fees.', 'error');
+    return;
+  }
+  // Older saved drafts may still use year/month/quarter.
+  const rentFrequencyAliases = { year: 'yearly', month: 'monthly', quarter: 'quarterly' };
+  const rentFrequencyInput = String(formData.get('rent_frequency') || 'yearly').toLowerCase();
+  const rentFrequency = rentFrequencyAliases[rentFrequencyInput] || rentFrequencyInput;
 
   setLoading(button, true, 'Submitting…');
   const payload = {
@@ -527,7 +540,7 @@ postForm.addEventListener('submit', async (event) => {
     purpose: 'rent',
     property_type: formData.get('property_type'),
     price: numberValue('price'),
-    rent_frequency: formData.get('rent_frequency') || 'year',
+    rent_frequency: rentFrequency,
     location: 'Lagos',
     neighbourhood: String(formData.get('neighbourhood')).trim(),
     full_address: String(formData.get('full_address')).trim(),
@@ -552,7 +565,12 @@ postForm.addEventListener('submit', async (event) => {
   if (error) {
     console.error(error);
     setLoading(button, false);
-    toast('Could not submit listing. Check the required fields.', 'error');
+    const errorMessages = {
+      '23502': 'A required property field is missing. Please review the form.',
+      '23514': 'One or more listing values are outside the allowed range.',
+      '42501': 'This account is not permitted to submit this listing type. Please check your dashboard mode.',
+    };
+    toast(errorMessages[error.code] || `Could not submit listing: ${error.message || 'Please try again.'}`, 'error');
     return;
   }
 
