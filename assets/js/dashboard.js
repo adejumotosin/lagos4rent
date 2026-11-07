@@ -222,7 +222,7 @@ async function loadListings() {
   });
 
   wrap.innerHTML = myListings
-    .map((item) => `<div class="listing-row"><img class="listing-thumb" src="${escapeHTML(cover.get(item.id) || '/assets/img/lagos4rent-official.svg')}" alt=""><div><strong>${escapeHTML(item.title)}</strong><div style="font-size:11px;color:var(--muted)">${escapeHTML(item.reference_code)} · ${escapeHTML(item.neighbourhood)} · ${money(item.price)}</div>${item.moderation_note ? `<div class="moderation-note">${escapeHTML(item.moderation_note)}</div>` : ''}</div><div><span class="status-dot ${item.publish_status}">${titleCase(item.publish_status)}</span><div style="font-size:10px;color:var(--muted);margin-top:5px">${titleCase(item.availability_status)}</div></div></div>`)
+    .map((item) => `<div class="listing-row"><img class="listing-thumb" src="${escapeHTML(cover.get(item.id) || '/assets/img/lagos4rent-official.svg')}" alt=""><div><strong>${escapeHTML(item.title)}</strong><div style="font-size:11px;color:var(--muted)">${escapeHTML(item.reference_code)} · ${escapeHTML(item.neighbourhood)} · ${money(item.price)}</div>${item.moderation_note ? `<div class="moderation-note">${escapeHTML(item.moderation_note)}</div>` : ''}</div><div><span class="status-dot ${item.publish_status}">${item.publish_status === 'draft' ? 'Pending Review' : titleCase(item.publish_status)}</span><div style="font-size:10px;color:var(--muted);margin-top:5px">${titleCase(item.availability_status)}</div></div></div>`)
     .join('');
 }
 
