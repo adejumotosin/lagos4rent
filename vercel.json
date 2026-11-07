@@ -6,7 +6,7 @@
     { "source": "/listings", "destination": "/listings.html" },
     { "source": "/listings/:slug", "destination": "/api/property?slug=:slug" },
     { "source": "/agents", "destination": "/agents.html" },
-    { "source": "/agents/:id", "destination": "/agent.html" },
+    { "source": "/agents/:id", "destination": "/agent" },
     { "source": "/join", "destination": "/join.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/safety", "destination": "/safety.html" },
